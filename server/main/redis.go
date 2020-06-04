@@ -48,3 +48,13 @@ func initRedis(addr string, idleConn, maxConn int, timeout time.Duration) (err e
 	}
 	return
 }
+
+// get conn
+func GetConn() redis.Conn {
+	return pool.Get()
+}
+
+// release conn
+func PutConn(conn redis.Conn) {
+	conn.Close()
+}

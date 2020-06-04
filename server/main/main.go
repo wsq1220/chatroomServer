@@ -19,6 +19,7 @@ func main() {
 
 	err := initConf("ini", "./server/conf/app.conf")
 	if err != nil {
+		logs.Error("init config failed, err: %v", err)
 		panic(err)
 	}
 	logs.Info("init conf succ!")
@@ -29,5 +30,4 @@ func main() {
 		panic(err)
 	}
 	logs.Info("init redis succ!")
-
 }

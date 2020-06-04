@@ -17,6 +17,7 @@ type Client struct {
 	buf    [8192]byte
 }
 
+// receive
 func (p *Client) readPackage() (msg proto.Message, err error) {
 	n, err := p.conn.Read(p.buf[0:4])
 	if n != 4 || err != nil {
@@ -45,6 +46,7 @@ func (p *Client) readPackage() (msg proto.Message, err error) {
 	return
 }
 
+// send
 func (p *Client) writePackage(data []byte) (err error) {
 	if data == nil {
 		return
