@@ -7,7 +7,7 @@ import (
 
 	"code.mypro.com/my_chat_room/chat_room/server/proto"
 	"github.com/astaxie/beego/logs"
-	"github.com/gomodule/redigo/redis"
+	"github.com/garyburd/redigo/redis"
 )
 
 var (
@@ -15,6 +15,8 @@ var (
 )
 
 // 其实是对redis pool的管理
+// 初始化后可以使用
+//  conn := pool.Get()
 type UserMgr struct {
 	pool *redis.Pool
 }
@@ -27,7 +29,7 @@ func NewUserMgr(pool *redis.Pool) (userMgr *UserMgr) {
 	return
 }
 
-func (p *UserMgr) GetUser(conn redis.Conn, userId int) (user *User, err error) {
+func (p *UserMgr) GetUser(conn redis.Conn, userId int) (user *proto.User, err error) {
 	defer conn.Close()
 	res, errGet := redis.String(conn.Do("HGET", Table, fmt.Sprintf("%v", userId)))
 	if errGet != nil {
@@ -39,7 +41,7 @@ func (p *UserMgr) GetUser(conn redis.Conn, userId int) (user *User, err error) {
 	}
 	logs.Info("result from getUser: %v", res)
 
-	user = &User{}
+	user = &proto.User{}
 	err = json.Unmarshal([]byte(res), user)
 	if err != nil {
 		logs.Error("json unmarshal failed, err: %v", err)
@@ -50,7 +52,7 @@ func (p *UserMgr) GetUser(conn redis.Conn, userId int) (user *User, err error) {
 	return
 }
 
-func (p *UserMgr) login(userId int, passwd string) (user *User, err error) {
+func (p *UserMgr) Login(userId int, passwd string) (user *proto.User, err error) {
 	conn := p.pool.Get()
 	defer conn.Close()
 
@@ -67,6 +69,41 @@ func (p *UserMgr) login(userId int, passwd string) (user *User, err error) {
 
 	user.Status = proto.UserStatusOnline
 	user.LastLogin = fmt.Sprintf("%v", time.Now())
+
+	return
+}
+
+// register user to redis
+func (p *UserMgr) Register(user *proto.User) (err error) {
+	conn := p.pool.Get()
+	defer conn.Close()
+
+	if user == nil {
+		err = proto.ErrInvalidParam
+		return
+	}
+
+	_, err = p.GetUser(conn, user.UserId)
+	if err == nil {
+		err = proto.ErrUserExist
+		return
+	}
+
+	if err != proto.ErrUserNotExist {
+		return
+	}
+
+	data, err := json.Marshal(user)
+	if err != nil {
+		logs.Error("json marshal failed, err: %v", err)
+		return
+	}
+
+	_, err = conn.Do("HSet", Table, fmt.Sprintf("%v", user.UserId), string(data))
+	if err != nil {
+		logs.Error("set value to redis failed, err: %v", err)
+		return
+	}
 
 	return
 }

@@ -30,4 +30,8 @@ func main() {
 		panic(err)
 	}
 	logs.Info("init redis succ!")
+
+	initUserMgr()
+
+	runServer("0.0.0.0:10000")
 }
