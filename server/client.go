@@ -30,15 +30,19 @@ func (p *Client) readPackage() (msg proto.Message, err error) {
 	logs.Debug("receive len: %v", packLen)
 
 	n, err = p.conn.Read(p.buf[0:packLen])
-	if n != int(packLen) {
-		errMsg := fmt.Sprintf("read body data failed, expect: %v, actual: %v", int(packLen), n)
-		err = errors.New(errMsg)
-		logs.Error(errMsg)
+	// if n != int(packLen) {
+	// 	errMsg := fmt.Sprintf("read body data failed, expect: %v, actual: %v", int(packLen), n)
+	// 	err = errors.New(errMsg)
+	// 	logs.Error(errMsg)
+	// 	return
+	// }
+	if err != nil {
+		logs.Error("read body data failed, err: %v", err)
 		return
 	}
 	logs.Info("received body data: %v", string(p.buf[0:packLen]))
 
-	if err = json.Unmarshal(p.buf[0:packLen], &msg); err != nil {
+	if err = json.Unmarshal(p.buf[0:n], &msg); err != nil {
 		logs.Error("json unmarshal failed, err: %v", err)
 		return
 	}
@@ -61,7 +65,7 @@ func (p *Client) writePackage(data []byte) (err error) {
 	}
 	logs.Info("write head data [%v] succ!", string(p.buf[0:4]))
 
-	n, err := p.conn.Write(data)
+	n, err := p.conn.Write([]byte(data))
 	if err != nil {
 		logs.Error("write data failed, err: %v", err)
 		return
@@ -81,8 +85,9 @@ func (p *Client) Process() (err error) {
 	for {
 		var msg proto.Message
 		msg, err = p.readPackage()
+		logs.Info("received msg: %v", msg)
 		if err != nil {
-			logs.Error("read package failed whrn processing: %v", err)
+			logs.Error("read package failed when processing: %v", err)
 			// TODO
 			// clientMgr.DelClient(p.UserId)
 			return
@@ -133,6 +138,10 @@ func (p *Client) login(msg proto.Message) (err error) {
 		return
 	}
 	logs.Info("user[%v] login succ!", loginData.Id)
+
+	// 添加到map中
+	clientMgr.AddClient(loginData.Id, p)
+	p.userId = loginData.Id
 
 	// 通知其他用户此登录用户上线了
 	p.notifyOtherUserOnline(loginData.Id)
@@ -186,6 +195,7 @@ func (p *Client) loginResp(err error) {
 	loginResp.StatusCode = 200
 
 	userMap := clientMgr.GetAllUsers()
+	logs.Debug("all user: %v", userMap)
 	// 所有在线的用户
 	for userId, _ := range userMap {
 		loginResp.User = append(loginResp.User, userId)
@@ -224,8 +234,13 @@ func (p *Client) register(msg proto.Message) (err error) {
 
 	err = mgr.Register(&register.User)
 	if err != nil {
+		logs.Error("register failed, err: %v", err)
 		return
 	}
+	logs.Info("register user [%v] succ!", register.User.UserId)
+	// if err = p.writePackage([]byte(resp)); err != nil {
+	// 	logs.Warn("register resp send failed, err: %v", err)
+	// }
 
 	return
 }

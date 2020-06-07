@@ -42,7 +42,8 @@ func initRedis(addr string, idleConn, maxConn int, timeout time.Duration) (err e
 		return
 	}
 
-	if _, err = conn.Do("SELECT", myConf.redisConf.DbNum); err != nil {
+	// if _, err = conn.Do("SELECT", myConf.redisConf.DbNum); err != nil {
+	if _, err = conn.Do("SELECT", 5); err != nil {
 		logs.Error("select redis db num failed, err: %v", err)
 		return
 	}

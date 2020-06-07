@@ -30,14 +30,15 @@ func NewUserMgr(pool *redis.Pool) (userMgr *UserMgr) {
 }
 
 func (p *UserMgr) GetUser(conn redis.Conn, userId int) (user *proto.User, err error) {
-	defer conn.Close()
-	res, errGet := redis.String(conn.Do("HGET", Table, fmt.Sprintf("%v", userId)))
-	if errGet != nil {
-		if errGet == redis.ErrNil {
+	// defer conn.Close()
+	res, err := redis.String(conn.Do("HGET", Table, fmt.Sprintf("%v", userId)))
+	if err != nil {
+		if err == redis.ErrNil {
 			err = proto.ErrUserNotExist
 		}
-		err = errGet
-		logs.Error("get user failed, err: %v", err)
+		// err = errGet
+		logs.Error("test: get user failed, err: %v", err)
+		return
 	}
 	logs.Info("result from getUser: %v", res)
 
@@ -75,6 +76,7 @@ func (p *UserMgr) Login(userId int, passwd string) (user *proto.User, err error)
 
 // register user to redis
 func (p *UserMgr) Register(user *proto.User) (err error) {
+	logs.Info("the param user: %v", user)
 	conn := p.pool.Get()
 	defer conn.Close()
 
@@ -84,17 +86,21 @@ func (p *UserMgr) Register(user *proto.User) (err error) {
 	}
 
 	_, err = p.GetUser(conn, user.UserId)
+	// logs.Error("got error when registering: %v", err)
 	if err == nil {
+		logs.Error("when err=nil, err: %v", err)
 		err = proto.ErrUserExist
 		return
 	}
 
 	if err != proto.ErrUserNotExist {
+		logs.Error("test the error: %v", err)
 		return
 	}
 
-	data, err := json.Marshal(user)
-	if err != nil {
+	data, errJson := json.Marshal(user)
+	if errJson != nil {
+		err = errJson
 		logs.Error("json marshal failed, err: %v", err)
 		return
 	}
@@ -105,5 +111,6 @@ func (p *UserMgr) Register(user *proto.User) (err error) {
 		return
 	}
 
+	logs.Error("will exit, err: %v", err)
 	return
 }
