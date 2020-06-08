@@ -12,7 +12,9 @@ Server port:
 go get github.com/wsq1220/chatroomServer
 
 
-go build ./server/main
+go build -o server ./chatroomServer
 
-./main
+./server
+
+![Image](https://raw.githubusercontent.com/wsq1220/chatroomServer/master/img/server.png)
 
