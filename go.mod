@@ -1,4 +1,4 @@
-module code.mypro.com/my_chat_room/chat_room
+module github.com/wsq1220/chatroomServer
 
 go 1.13
 

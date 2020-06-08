@@ -1,7 +1,7 @@
 package proto
 
 // 这里会出现循环导入的问题
-// import "code.mypro.com/my_chat_room/chat_room/server/model"
+// import "github.com/wsq1220/chatroomServer/model"
 
 type Message struct {
 	Cmd  string `json:"cmd"`

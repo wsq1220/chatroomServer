@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"code.mypro.com/my_chat_room/chat_room/server/proto"
 	"github.com/astaxie/beego/logs"
 	"github.com/garyburd/redigo/redis"
+	"github.com/wsq1220/chatroomServer/proto"
 )
 
 var (

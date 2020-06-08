@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net"
 
-	"code.mypro.com/my_chat_room/chat_room/server/proto"
 	"github.com/astaxie/beego/logs"
+	"github.com/wsq1220/chatroomServer/proto"
 )
 
 type Client struct {

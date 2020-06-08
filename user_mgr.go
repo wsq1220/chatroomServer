@@ -1,6 +1,6 @@
 package main
 
-import "code.mypro.com/my_chat_room/chat_room/server/model"
+import "github.com/wsq1220/chatroomServer/model"
 
 var (
 	mgr *model.UserMgr
