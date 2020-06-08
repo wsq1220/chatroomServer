@@ -6,9 +6,11 @@ Go version: 1.13
 Frame: Beego(config, logs)
 
 Build and run
-go get github.com/wsq1220/chatroomServer
 
 Server port:
+
+go get github.com/wsq1220/chatroomServer
+
 
 go build ./server/main
 

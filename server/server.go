@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/astaxie/beego/logs"
+	"github.com/fatih/color"
 )
 
 func runServer(addr string) (err error) {
@@ -13,7 +14,11 @@ func runServer(addr string) (err error) {
 		logs.Error("net listen failed, err: %v", err)
 		return
 	}
-	fmt.Printf("server is listening: %v\n", addr)
+	theNotice := fmt.Sprintf("server is listening: %v", addr)
+	color.Set(color.FgGreen, color.Bold)
+	// fmt.Printf("server is listening: %v\n", addr)
+	fmt.Println(theNotice)
+	color.Unset()
 
 	for {
 		conn, err := l.Accept()

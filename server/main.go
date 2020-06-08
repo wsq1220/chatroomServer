@@ -8,8 +8,6 @@ import (
 )
 
 func main() {
-	// 先加载log的config
-	// loadLogConf()
 
 	if err := initLogger(); err != nil {
 		fmt.Printf("init logger failed, err: %v\n", err)
